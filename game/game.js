@@ -60,6 +60,8 @@ var TileSum = TileSum || {};
 
   // game engine update call
   G.prototype.update = function() {
+
+    this.game.physics.arcade.collide(this.numTilesPool, this.numTilesPool);
     
     // check whether we need a new num
     // puzzle num equals 0 means we need a new number
@@ -76,19 +78,23 @@ var TileSum = TileSum || {};
 
   // draw an 8 x 8 coloumn of random number tiles
   function drawNumTiles(numX, numY) {
-    for( var i = 1, x, y = 45, random; i <= numY; i += 1) {
+    for( var i = 1, x, y = this.game.height, random; i <= numY; i += 1) {
       x = 50;
       for(var j = 1; j <= numX; j += 1) {
         random = this.stage.game.rnd.integerInRange(1, 9);
         var tile = this.game.add.sprite(x, y, 'numTile' + random);
         tile.anchor.setTo(0.5, 0.5);
+        this.game.physics.enable(tile, Phaser.Physics.ARCADE);
+        tile.body.gravity.y = 200;
+        tile.body.bounce.y = 0.5;
+        tile.body.collideWorldBounds = true
         tile.tileNum = random;
         tile.inputEnabled = true;
         tile.events.onInputDown.add(userTouchedTile, this);
         this.numTilesPool.add(tile);
         x += 77;
       }
-      y += 77;;
+      y -= 90;
     }
   }
 
