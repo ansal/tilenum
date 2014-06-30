@@ -7,8 +7,12 @@ var TileSum = TileSum || {};
 (function(){
   'use strict';
 
+  // number of tiles
   var NUM_TILE_X = 8;
-  var NUM_TILE_Y = 2;
+  var NUM_TILE_Y = 7;
+
+  // number of tiles to sum for random numbers
+  var RAND_NUM_TILES = 3;
 
   // game constructor
   TileSum.Game = function(game){};
@@ -39,6 +43,9 @@ var TileSum = TileSum || {};
 
   // create objects on screen
   G.prototype.create = function() {
+
+    // game state
+    this.gameOver = false;
 
     // draw background
     var xReq = 1 + this.game.width / 256;
@@ -136,14 +143,30 @@ var TileSum = TileSum || {};
 
   // reset puzzle number and selected tiles
   function newPuzzleNum() {
-    var remTileSum = sumOfTiles.apply(this);
-    var random = this.stage.game.rnd.integerInRange(10, 20);
-    // help user to clear remaining tiles if there are less number of tiles
-    if(random > remTileSum) {
-      random = this.numTilesPool.getFirstAlive().tileNum;
+
+    // check for game over state
+    if(this.gameOver) {
+      return;
     }
-    this.puzzleNum = random;
-    this.puzzleNumText.setText(random);
+
+    // shortcut for random function
+    var randInt = this.stage.game.rnd.integerInRange;
+    window.x = this.numTilesPool;
+    var aliveTiles = this.numTilesPool.countLiving();
+
+    var puzzleNum = 0;
+    for(var i = 1; i <= RAND_NUM_TILES && i <= aliveTiles; i += 1) {
+      var randomTile = this.numTilesPool.getRandom();
+      if(randomTile.alive) {
+        puzzleNum += randomTile.tileNum;
+      }
+    }
+    if(puzzleNum === 0) {
+      puzzleNum = this.numTilesPool.getFirstAlive().tileNum;
+    }
+
+    this.puzzleNum = puzzleNum;
+    this.puzzleNumText.setText(puzzleNum);
     this.tappedTiles = [];
   }
 
@@ -170,6 +193,12 @@ var TileSum = TileSum || {};
 
   // event handler for user touching/clicking a tile
   function userTouchedTile (tile, event) {
+
+    // check for game over state
+    if(this.gameOver) {
+      return;
+    }
+
     // check whether the tile is already rotated or not
     if(tile.rotation !== 0) {
       return;
@@ -180,21 +209,28 @@ var TileSum = TileSum || {};
       sum += this.tappedTiles[i].tileNum;
     }
 
+    // if sum of user selected tiles are greater than puzzle num,
+    // its game over
+    if(sum > this.puzzleNum) {
+      this.gameOver = true;
+      return;
+    }
+
     // if sum equals numbers in the tiles kill all the tiles
     // and draw new number
     // if all the tiles are finished, advance to next level
-    // make it easy for user if there are a few tiles too
     if(sum === this.puzzleNum) {
       this.tappedTiles.forEach(function(x){
         x.kill();
       });
-      newPuzzleNum.apply(this);
-    }
 
-    // if sum of user selected tiles are greater than puzzle num,
-    // its game over
-    if(sum > this.puzzleNum) {
-      
+      if(this.numTilesPool.countLiving() === 0) {
+        this.gameOver = true;
+        window.alert('Finished');
+        return;
+      }
+
+      newPuzzleNum.apply(this);
     }
 
   }
@@ -213,17 +249,14 @@ var TileSum = TileSum || {};
 
   // updates game clock
   function updateGameTime() {
+
+    // check for game over state
+    if(this.gameOver) {
+      return;
+    }
+
     this.timeRemaining -= 1;
     this.timeRemainingText.setText(this.timeRemaining);
-  }
-
-  // sum of remaining tiles
-  function sumOfTiles() {
-    var sum = 0;
-    this.numTilesPool.forEachAlive(function(x){
-      sum += x.tileNum;
-    });
-    return sum;
   }
 
 })();
