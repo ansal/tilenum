@@ -14,6 +14,9 @@ var TileSum = TileSum || {};
   // number of tiles to sum for random numbers
   var RAND_NUM_TILES = 3;
 
+  // counter start
+  var COUNTER_START = 480;
+
   // game constructor
   TileSum.Game = function(game){};
 
@@ -115,7 +118,7 @@ var TileSum = TileSum || {};
     });
 
     // time remaining info
-    this.timeRemaining = 180;
+    this.timeRemaining = COUNTER_START;
     this.timeRemainingText = this.game.add.text(
       this.game.width - 130, 
       300,
