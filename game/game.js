@@ -1,4 +1,4 @@
-//  Tile Sum Game mail file
+//  Tile Sum Game main file
 //  Author: github.com/ansal
 
 // global variable for holding game data
@@ -15,7 +15,110 @@ var TileSum = TileSum || {};
   var RAND_NUM_TILES = 3;
 
   // counter start
-  var COUNTER_START = 480;
+  var COUNTER_START = 400;
+
+  // intro screen
+
+  // constructor for level failed screen
+  TileSum.Intro = function(game){};
+  // shortcut
+  var I = TileSum.Intro;
+  I.prototype.preload = function() {
+    // background
+    this.game.load.image('bg', 'assets/img/bg.png');
+    // blank tile
+    this.game.load.image('blankTile', 'assets/img/blankTile.png');
+    // bush
+    this.game.load.image('bush', 'assets/img/bush.png');
+  }; 
+  I.prototype.create = function() {
+
+    // draw background
+    drawBackground.apply(this);
+    // draw bush
+    drawBush.apply(this);
+
+    this.githubText = this.game.add.text(
+      this.game.width - 350, 
+      10,
+      "github.com/ansal/tilesum", {
+      font: "30px Helvetica",
+      fill: "green",
+      align: "white"
+    });
+
+    this.titleText = this.game.add.text(
+      10, 
+      180,
+      "TILESUM", {
+      font: "180px Helvetica",
+      fill: "green",
+      align: "right"
+    });
+
+    this.startButton = this.game.add.sprite(320, 400, 'blankTile');
+    this.buttonText = this.game.add.text(
+      335, 
+      410,
+      "Start!", {
+      font: "50px Helvetica",
+      fill: "white",
+      align: "right"
+    });
+
+    // add touch/click event fot continue button and text
+    this.startButton.inputEnabled = true;
+    this.startButton.events.onInputDown.add(userTouchedContinue, this);
+    this.buttonText.inputEnabled = true;
+    this.buttonText.events.onInputDown.add(userTouchedContinue, this);
+
+  };
+
+  // constructor for level failed screen
+  TileSum.LevelFailed = function(game){};
+  // shortcut
+  var LF = TileSum.LevelFailed;
+  LF.prototype.preload = function() {
+    // background
+    this.game.load.image('bg', 'assets/img/bg.png');
+    // blank tile
+    this.game.load.image('blankTile', 'assets/img/blankTile.png');
+    // bush
+    this.game.load.image('bush', 'assets/img/bush.png');
+  }; 
+  LF.prototype.create = function() {
+
+    // draw background
+    drawBackground.apply(this);
+    // draw bush
+    drawBush.apply(this);
+
+    this.levelFailedText = this.game.add.text(
+      20, 
+      200,
+      "Oh! Oh! Thats Wrong! Tap Continue to try again!", {
+      font: "35px Helvetica",
+      fill: "green",
+      align: "right"
+    });
+
+    this.continueButton = this.game.add.sprite(320, 250, 'blankTile');
+    this.buttonText = this.game.add.text(
+      330, 
+      270,
+      "Continue", {
+      font: "32px Helvetica",
+      fill: "white",
+      align: "right"
+    });
+
+    // add touch/click event fot continue button and text
+    this.continueButton.inputEnabled = true;
+    this.continueButton.events.onInputDown.add(userTouchedContinue, this);
+    this.buttonText.inputEnabled = true;
+    this.buttonText.events.onInputDown.add(userTouchedContinue, this);
+
+  };
 
   // game constructor
   TileSum.Game = function(game){};
@@ -42,6 +145,11 @@ var TileSum = TileSum || {};
       this.game.load.image('numTile' + i, 'assets/img/num' + i + '.png');
     }
 
+    // sounds
+    this.game.load.audio('correctSound', 'assets/sounds/correct.ogg');
+    this.game.load.audio('wrongSound', 'assets/sounds/wrong.ogg');
+    this.game.load.audio('tileRollSound', 'assets/sounds/tileRoll.ogg');
+
   };
 
   // create objects on screen
@@ -51,16 +159,7 @@ var TileSum = TileSum || {};
     this.gameOver = false;
 
     // draw background
-    var xReq = 1 + this.game.width / 256;
-    var yReq = 1 + this.game.width / 256;
-    for(var i = 1, x, y = 0; i <= yReq; i += 1) {
-      x = 0;
-      for (var j = 1; j <= xReq; j += 1) {
-        this.game.add.sprite(x, y, 'bg');
-        x += 256;
-      }
-      y += 256;
-    }
+    drawBackground.apply(this);
 
     // draw clouds
     this.cloudPool = this.game.add.group();
@@ -86,11 +185,8 @@ var TileSum = TileSum || {};
     );
 
     // draw bush
-    var xReq = 1 + this.game.width  / 50;
-    var y = this.game.height - 70;
-    for(var i = 1, x = 0; i <= xReq; i += 1, x += 50) {
-      this.game.add.sprite(x, y, 'bush');
-    }
+    drawBush.apply(this);
+    
 
     this.numTilesPool = this.game.add.group();
     // invoke utility function to draw tiles
@@ -117,16 +213,33 @@ var TileSum = TileSum || {};
       align: "right"
     });
 
-    // time remaining info
-    this.timeRemaining = COUNTER_START;
+    // level info
+    var level = getLevel();
     this.timeRemainingText = this.game.add.text(
-      this.game.width - 130, 
+      this.game.width - 140, 
+      270,
+      "Level " + level, {
+      font: "25px Helvetica",
+      fill: "green",
+      align: "right"
+    });
+
+    // time remaining info
+    // time remaining is start time - (level -1 * 10)
+    this.timeRemaining = COUNTER_START - ( (level - 1) * 10 );
+    this.timeRemainingText = this.game.add.text(
+      this.game.width - 150, 
       300,
       this.timeRemaining, {
       font: "60px Helvetica",
       fill: "green",
       align: "right"
     });
+
+    // sounds
+    this.soundCorrect = this.game.add.audio('correctSound');
+    this.soundWrong = this.game.add.audio('wrongSound');
+    this.soundTileRolled = this.game.add.audio('tileRollSound');
 
     // timer to update game
     this.game.time.events.loop(
@@ -142,7 +255,30 @@ var TileSum = TileSum || {};
     
   };
 
-  // utility functions
+  // utility functions  
+
+  function drawBackground() {
+    // draw background
+    var xReq = 1 + this.game.width / 256;
+    var yReq = 1 + this.game.width / 256;
+    for(var i = 1, x, y = 0; i <= yReq; i += 1) {
+      x = 0;
+      for (var j = 1; j <= xReq; j += 1) {
+        this.game.add.sprite(x, y, 'bg');
+        x += 256;
+      }
+      y += 256;
+    }
+  }
+
+  // draw bush
+  function drawBush () {
+    var xReq = 1 + this.game.width  / 50;
+    var y = this.game.height - 70;
+    for(var i = 1, x = 0; i <= xReq; i += 1, x += 50) {
+      this.game.add.sprite(x, y, 'bush');
+    }
+  }
 
   // reset puzzle number and selected tiles
   function newPuzzleNum() {
@@ -197,6 +333,8 @@ var TileSum = TileSum || {};
   // event handler for user touching/clicking a tile
   function userTouchedTile (tile, event) {
 
+    this.soundTileRolled.play();
+
     // check for game over state
     if(this.gameOver) {
       return;
@@ -215,7 +353,9 @@ var TileSum = TileSum || {};
     // if sum of user selected tiles are greater than puzzle num,
     // its game over
     if(sum > this.puzzleNum) {
+      this.soundWrong.play();
       this.gameOver = true;
+      TileSum.game.state.start('LevelFailed');
       return;
     }
 
@@ -223,13 +363,16 @@ var TileSum = TileSum || {};
     // and draw new number
     // if all the tiles are finished, advance to next level
     if(sum === this.puzzleNum) {
+      this.soundCorrect.play();
       this.tappedTiles.forEach(function(x){
         x.kill();
       });
 
       if(this.numTilesPool.countLiving() === 0) {
         this.gameOver = true;
-        window.alert('Finished');
+        // update the game level and reload the game play
+        incrLevel();
+        TileSum.game.state.start('Play');
         return;
       }
 
@@ -260,6 +403,39 @@ var TileSum = TileSum || {};
 
     this.timeRemaining -= 1;
     this.timeRemainingText.setText(this.timeRemaining);
+  }
+
+  // level saver
+  // checks for level value in localstorage
+  function getLevel() {
+    var level = localStorage.getItem('level');
+    if(!level) {
+      level = 1;
+      localStorage.setItem('level', level);
+    } else {
+      level = parseInt(level, 10);
+    }
+    return level;
+  }
+
+  // increments the level to one
+  function incrLevel() {
+    var level = localStorage.getItem('level');
+    if(!level) {
+      level = 1;
+      localStorage.setItem('level', level);
+      return level;
+    } else {
+      level = parseInt(level, 10);
+      level += 1;
+      localStorage.setItem('level', level);
+      return level;
+    }
+  }
+
+  // continue the gameplay when user fails a level
+  function userTouchedContinue() {
+    TileSum.game.state.start('Play');
   }
 
 })();

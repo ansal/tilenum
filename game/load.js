@@ -4,9 +4,11 @@ var TileSum = TileSum || {};
 (function(){
   'use strict';
   
-  var game = new Phaser.Game(800, 630, Phaser.CANVAS, 'game');
-  game.state.add('Play', TileSum.Game, false);
+  TileSum.game = new Phaser.Game(800, 630, Phaser.CANVAS, 'game');
+  TileSum.game.state.add('Play', TileSum.Game, false);
+  TileSum.game.state.add('LevelFailed', TileSum.LevelFailed, false);
+  TileSum.game.state.add('Intro', TileSum.Intro, false);
 
-  game.state.start('Play');
+  TileSum.game.state.start('Intro');
 
 })();
