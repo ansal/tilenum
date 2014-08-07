@@ -7,6 +7,8 @@ var TileSum = TileSum || {};
 (function(){
   'use strict';
 
+  TileSum.FailedReason= 'Oh! Oh! Thats Wrong! Tap Continue to try again!';
+
   // number of tiles
   var NUM_TILE_X = 8;
   var NUM_TILE_Y = 7;
@@ -15,7 +17,7 @@ var TileSum = TileSum || {};
   var RAND_NUM_TILES = 3;
 
   // counter start
-  var COUNTER_START = 400;
+  var COUNTER_START = 300;
 
   // intro screen
 
@@ -96,7 +98,7 @@ var TileSum = TileSum || {};
     this.levelFailedText = this.game.add.text(
       20, 
       200,
-      "Oh! Oh! Thats Wrong! Tap Continue to try again!", {
+      TileSum.FailedReason, {
       font: "35px Helvetica",
       fill: "green",
       align: "right"
@@ -403,6 +405,14 @@ var TileSum = TileSum || {};
 
     this.timeRemaining -= 1;
     this.timeRemainingText.setText(this.timeRemaining);
+
+    // if the time reaches 0, show the failed screen
+    if(this.timeRemaining <= 0) {
+      TileSum.FailedReason= 'Oh! Oh! Time is Over! Tap Continue to try again!';
+      TileSum.game.state.start('LevelFailed');
+      return;
+    }
+
   }
 
   // level saver
