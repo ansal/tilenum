@@ -3,7 +3,7 @@ TileNum
 
 Play the online version here - http://ansal.github.io/tilenum/
 
-Download APK for Android here - https://github.com/ansal/tilenum/raw/master/assets/TileSum_2014_08_01-12_16_33_GooglePlaystoreV3_debug_signed.apk
+Download APK for Android here - https://github.com/ansal/tilenum/raw/master/assets/TileSum_2014_08_07-12_28_35_GooglePlaystoreV3_debug_signed.apk
 
 ![Screenshot](https://github.com/ansal/tilenum/raw/master/assets/img/screenshot.png "Screenshot")
 
